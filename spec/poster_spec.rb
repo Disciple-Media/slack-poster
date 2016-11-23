@@ -67,5 +67,20 @@ describe Slack::Poster do
         end
       end
     end
+
+    context 'with client_options set' do
+      let(:options) { { client_options: { request: { open_timeout: 5, timeout: 5 } } } }
+
+      it 'passes the client_options to Faraday' do
+        VCR.use_cassette('default_post') do
+          expect(Faraday)
+            .to receive(:new)
+            .with(hash_including(request: { open_timeout: 5, timeout: 5 }))
+            .and_call_original
+
+          with_options.send_message('Hello world')
+        end
+      end
+    end
   end
 end

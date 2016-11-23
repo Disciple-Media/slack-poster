@@ -7,7 +7,7 @@ require 'faraday'
 
 module Slack
   class Poster
-    attr_accessor :options
+    attr_accessor :options, :client_options
 
     # Define getters and setters for the options hash keys. This will make assign of the options
     # more flexible.
@@ -38,6 +38,7 @@ module Slack
       @base_uri = webhook_url
 
       @options = options
+      @client_options = options.delete(:client_options) || {}
 
       raise ArgumentError, 'Webhook URL is required' if webhook_url.nil?
     end
@@ -57,7 +58,7 @@ module Slack
     def send_message(message)
       body = message.is_a?(String) ? options.merge(text: message) : options.merge(message.as_json)
 
-      conn = Faraday.new(url: @base_uri)
+      conn = Faraday.new(client_options.merge(url: @base_uri))
 
       response = conn.post('', payload: body.to_json)
 
